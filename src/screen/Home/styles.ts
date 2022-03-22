@@ -154,3 +154,9 @@ export const Frete = styled.Text`
 export const FooterButton = styled.View`
   padding: 16px;
 `;
+
+export const LoadContainer = styled.View`
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+`;

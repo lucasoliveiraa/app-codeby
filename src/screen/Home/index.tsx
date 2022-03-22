@@ -1,8 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import Icon from 'react-native-vector-icons/Feather';
 import api from '../../services/api';
-import {useNavigation} from '@react-navigation/native';
-import {StatusBar} from 'react-native';
+import {StatusBar, ActivityIndicator} from 'react-native';
 import formatValue from '../../utils/formatValue';
 
 import {Button} from '../../components/Button';
@@ -31,6 +30,7 @@ import {
   TotalValue,
   Frete,
   FooterButton,
+  LoadContainer,
 } from './styles';
 
 interface Product {
@@ -41,12 +41,7 @@ interface Product {
   quantity: number;
 }
 
-type NavigationProps = {
-  navigate: (screen: string) => void;
-};
-
 export function Home() {
-  const navigation = useNavigation<NavigationProps>();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -77,8 +72,8 @@ export function Home() {
       });
 
       setProducts(
-        products.map(mappedFood =>
-          mappedFood.id === product.id ? {...response.data} : mappedFood,
+        products.map(mappedCar =>
+          mappedCar.id === product.id ? {...response.data} : mappedCar,
         ),
       );
     } catch (err) {
@@ -126,42 +121,48 @@ export function Home() {
         </Header>
 
         <Content>
-          <ProductContainer>
-            <ProductList
-              data={products}
-              keyExtractor={item => item.id}
-              showsVerticalScrollIndicator={false}
-              renderItem={({item}: {item: Product}) => (
-                <Product>
-                  <ProductImage source={{uri: item.image_url}} />
-                  <ProductTitleContainer>
-                    <ProductTitle>{item.title}</ProductTitle>
-                    <ProductPriceContainer>
-                      <ProductSinglePrice>
-                        {formatValue(item.price)}
-                      </ProductSinglePrice>
+          {loading ? (
+            <LoadContainer>
+              <ActivityIndicator color="#1e81b0" size="large" />
+            </LoadContainer>
+          ) : (
+            <ProductContainer>
+              <ProductList
+                data={products}
+                keyExtractor={item => item.id}
+                showsVerticalScrollIndicator={false}
+                renderItem={({item}: {item: Product}) => (
+                  <Product>
+                    <ProductImage source={{uri: item.image_url}} />
+                    <ProductTitleContainer>
+                      <ProductTitle>{item.title}</ProductTitle>
+                      <ProductPriceContainer>
+                        <ProductSinglePrice>
+                          {formatValue(item.price)}
+                        </ProductSinglePrice>
 
-                      <TotalContainer>
-                        <ProductQuantity>{`${item.quantity}x`}</ProductQuantity>
+                        <TotalContainer>
+                          <ProductQuantity>{`${item.quantity}x`}</ProductQuantity>
 
-                        <ProductPrice>
-                          {formatValue(item.price * item.quantity)}
-                        </ProductPrice>
-                      </TotalContainer>
-                    </ProductPriceContainer>
-                  </ProductTitleContainer>
-                  <ActionContainer>
-                    <ActionButton onPress={() => handleIncrement(item)}>
-                      <Icon name="plus" color="#1e81b0" size={16} />
-                    </ActionButton>
-                    <ActionButton onPress={() => handleDecrement(item)}>
-                      <Icon name="minus" color="#1e81b0" size={16} />
-                    </ActionButton>
-                  </ActionContainer>
-                </Product>
-              )}
-            />
-          </ProductContainer>
+                          <ProductPrice>
+                            {formatValue(item.price * item.quantity)}
+                          </ProductPrice>
+                        </TotalContainer>
+                      </ProductPriceContainer>
+                    </ProductTitleContainer>
+                    <ActionContainer>
+                      <ActionButton onPress={() => handleIncrement(item)}>
+                        <Icon name="plus" color="#1e81b0" size={16} />
+                      </ActionButton>
+                      <ActionButton onPress={() => handleDecrement(item)}>
+                        <Icon name="minus" color="#1e81b0" size={16} />
+                      </ActionButton>
+                    </ActionContainer>
+                  </Product>
+                )}
+              />
+            </ProductContainer>
+          )}
         </Content>
         <FooterTotal>
           <TotalCar>
@@ -174,10 +175,7 @@ export function Home() {
         </FooterTotal>
 
         <FooterButton>
-          <Button
-            title="Finalizar compra"
-            onPress={() => navigation.navigate('Register')}
-          />
+          <Button title="Finalizar compra" onPress={() => {}} />
         </FooterButton>
       </Container>
     </>
