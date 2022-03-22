@@ -150,3 +150,7 @@ export const Frete = styled.Text`
   font-size: ${RFValue(14)}px;
   font-family: 'Poppins-Bold';
 `;
+
+export const FooterButton = styled.View`
+  padding: 16px;
+`;

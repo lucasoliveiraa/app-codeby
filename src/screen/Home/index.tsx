@@ -3,6 +3,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import api from '../../services/api';
 import {useNavigation} from '@react-navigation/native';
 import {StatusBar} from 'react-native';
+import formatValue from '../../utils/formatValue';
 
 import {Button} from '../../components/Button';
 
@@ -29,6 +30,7 @@ import {
   Total,
   TotalValue,
   Frete,
+  FooterButton,
 } from './styles';
 
 interface Product {
@@ -59,9 +61,57 @@ export function Home() {
     }
   }
 
+  const total = products.reduce((sumTotal, product) => {
+    sumTotal += product.price * product.quantity;
+
+    return sumTotal;
+  }, 0);
+
+  async function handleIncrement(product: Product): Promise<void> {
+    try {
+      const response = await api.put(`/products/${product.id}`, {
+        quantity: product.quantity + 1,
+        title: product.title,
+        image_url: product.image_url,
+        price: product.price,
+      });
+
+      setProducts(
+        products.map(mappedFood =>
+          mappedFood.id === product.id ? {...response.data} : mappedFood,
+        ),
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async function handleDecrement(product: Product): Promise<void> {
+    if (product.quantity <= 1) {
+      return;
+    }
+
+    try {
+      const response = await api.put(`/products/${product.id}`, {
+        quantity: product.quantity - 1,
+        title: product.title,
+        image_url: product.image_url,
+        price: product.price,
+      });
+
+      setProducts(
+        products.map(mappedCar =>
+          mappedCar.id === product.id ? {...response.data} : mappedCar,
+        ),
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
   useEffect(() => {
     loadData();
-  }, [products]);
+  }, []);
 
   return (
     <>
@@ -87,26 +137,24 @@ export function Home() {
                   <ProductTitleContainer>
                     <ProductTitle>{item.title}</ProductTitle>
                     <ProductPriceContainer>
-                      <ProductSinglePrice>R$ {item.price}</ProductSinglePrice>
+                      <ProductSinglePrice>
+                        {formatValue(item.price)}
+                      </ProductSinglePrice>
 
                       <TotalContainer>
                         <ProductQuantity>{`${item.quantity}x`}</ProductQuantity>
 
                         <ProductPrice>
-                          R$ {item.price * item.quantity}
+                          {formatValue(item.price * item.quantity)}
                         </ProductPrice>
                       </TotalContainer>
                     </ProductPriceContainer>
                   </ProductTitleContainer>
                   <ActionContainer>
-                    <ActionButton
-                      // onPress={() => handleIncrement(item.id)}>
-                      onPress={() => {}}>
+                    <ActionButton onPress={() => handleIncrement(item)}>
                       <Icon name="plus" color="#1e81b0" size={16} />
                     </ActionButton>
-                    <ActionButton
-                      // onPress={() => handleDecrement(item.id)}>
-                      onPress={() => {}}>
+                    <ActionButton onPress={() => handleDecrement(item)}>
                       <Icon name="minus" color="#1e81b0" size={16} />
                     </ActionButton>
                   </ActionContainer>
@@ -118,15 +166,19 @@ export function Home() {
         <FooterTotal>
           <TotalCar>
             <Total>Total</Total>
-            <TotalValue>R$10</TotalValue>
+            <TotalValue>{formatValue(total)}</TotalValue>
           </TotalCar>
-          <Frete>Parabéns, sua compra tem frete grátis !</Frete>
+          {total >= 10 && (
+            <Frete>Parabéns, sua compra tem frete grátis !</Frete>
+          )}
         </FooterTotal>
 
-        <Button
-          title="Finalizar compra"
-          onPress={() => navigation.navigate('Register')}
-        />
+        <FooterButton>
+          <Button
+            title="Finalizar compra"
+            onPress={() => navigation.navigate('Register')}
+          />
+        </FooterButton>
       </Container>
     </>
   );
